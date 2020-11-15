@@ -1,0 +1,54 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+
+{% block body %}
+
+<h2 style="text-align: center;">Following</h2>
+
+<div id="grand-post">
+    {% for post in posts_info  %}
+      <div id="div-{{ post.post.pk }}" class="list-posts">
+        <p id="post-owner"><strong><a class="link-user" href="{% url 'userPage' post.owner.pk %}">{{ post.owner }}</a></strong> ({{ post.post.post_date }})</p>
+        <textarea  id="textarea-{{ post.post.pk }}" class="post-content" disabled >{{ post.post.post_content }}</textarea>
+        <div class="div-for-likes">
+            
+            {% if post.is_liked and user.is_authenticated %}
+                <div onclick="likeButton(this)" value="close" id="{{ post.post.pk }}" class="like-button-close">Liked</div>
+            {% elif not post.is_liked and user.is_authenticated%}
+                <div onclick="likeButton(this)" value="open" id="{{ post.post.pk }}" class="like-button-open" >Like</div>
+            {% endif %}
+
+            <p class="p-like">Likes: <strong id="likes-{{ post.post.pk }}">{{ post.number_of_likes }}</strong></p>
+                
+        </div>
+
+        {% if post.owner == request.user %}
+            <div id="edit-{{ post.post.pk }}" data-post="{{ post.post.pk }}" onclick="editPost(this)" class="div-link-to-edit"><p class="link-to-edit" >Edit</p></div>
+            <div id="finish-edit-{{ post.post.pk }}" data-post="{{ post.post.pk }}" onclick="finishEditPost(this)" class="div-link-to-edit" style="display: none;"><p class="link-to-edit" >Finish edition</p></div>
+        {% endif %}
+
+      </div>
+    {% endfor %}
+
+    {% if loadPlus %}
+    <form action="{% url 'show10Posts' 'up' 'following' 0 %}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" value="{{ start }}" name="start">
+        <input type="submit" value="Next" id="load-posts-button">
+    </form>
+    {% endif %}
+    
+    {% if loadMinus %}
+    <form action="{% url 'show10Posts' 'down' 'following' 0 %}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" value="{{ start }}" name="start">
+        <input type="submit" value="Previus" id="load-posts-button">
+    </form>
+    {% endif %}
+        
+    </div>
+
+    <script src="{% static 'network/indexSTATIC.js' %}"></script>
+
+{% endblock %}

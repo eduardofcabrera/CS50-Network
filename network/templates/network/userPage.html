@@ -1,0 +1,72 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+    
+<div class="container">
+    <div class="row">
+      <div class="col-sm-3" id="left-bar-user">
+        <h2 class="user-text-page">{{ user_page }}</h2>
+        <p class="user-text-page">{{ user_page.email }}</p>
+
+        {% if my_page %}
+        <p id="profile"  class="user-text-page" ><div class="link-follow">Your profile</div></p>
+        {% elif i_follow %}
+        <p class="user-text-page" ><div data-id="{{ user_page }}" class="link-following" onclick="followButton(this)">Stop following</div></p>
+        {% else %}
+        <p class="user-text-page" ><div data-id="{{ user_page }}" class="link-follow" onclick="followButton(this)">Follow</div></p>
+        {% endif %}
+        
+        <div id="following-followers-div">
+        <p class="following-followers" >Following: <p id="following">{{ number_of_following }}</p></p>
+        <p class="following-followers" >Followers: <p id="followers">{{ number_of_followers }}</p></p>
+        </div>
+      </div>
+      <div class="col-sm-9" id="right-bar-user">
+        <div id="grand-post">
+          {% for post in posts  %}
+            <div id="div-{{ post.post.pk }}" class="list-posts">
+              <p id="post-owner"><strong><a class="link-user" href="{% url 'userPage' post.owner.pk %}">{{ post.owner }}</a></strong> ({{ post.post.post_date }})</p>
+              <textarea  id="textarea-{{ post.post.pk }}" class="post-content" disabled >{{ post.post.post_content }}</textarea>
+              <div class="div-for-likes">
+                  
+                  {% if post.is_liked and user.is_authenticated %}
+                      <div onclick="likeButton(this)" value="close" id="{{ post.post.pk }}" class="like-button-close">Liked</div>
+                  {% elif not post.is_liked and user.is_authenticated%}
+                      <div onclick="likeButton(this)" value="open" id="{{ post.post.pk }}" class="like-button-open" >Like</div>
+                  {% endif %}
+                  
+                  <p class="p-like">Likes: <strong id="likes-{{ post.post.pk }}">{{ post.number_of_likes }}</strong></p>
+
+                  {% if post.owner == request.user %}
+                  <div id="edit-{{ post.post.pk }}" data-post="{{ post.post.pk }}" onclick="editPost(this)" class="div-link-to-edit"><p class="link-to-edit" >Edit</p></div>
+                  <div id="finish-edit-{{ post.post.pk }}" data-post="{{ post.post.pk }}" onclick="finishEditPost(this)" class="div-link-to-edit" style="display: none;"><p class="link-to-edit" >Finish edition</p></div>
+                  {% endif %}
+
+                </div>
+            </div>
+          {% endfor %}
+
+          {% if loadPlus %}
+          <form action="{% url 'show10Posts' 'up' 'userPage' user_page.pk %}" method="POST">
+              {% csrf_token %}
+              <input type="hidden" value="{{ start }}" name="start">
+              <input type="submit" value="Next" id="load-posts-button">
+          </form>
+          {% endif %}
+          
+          {% if loadMinus %}
+          <form action="{% url 'show10Posts' 'down' 'userPage' user_page.pk %}" method="POST">
+              {% csrf_token %}
+              <input type="hidden" value="{{ start }}" name="start">
+              <input type="submit" value="Previus" id="load-posts-button">
+          </form>
+          {% endif %}
+
+      </div>
+    </div>
+  </div>
+  <script src="{% static 'network/userPage.js' %}" ></script>
+  <script src="{% static 'network/indexSTATIC.js' %}"></script>
+
+{% endblock body %}
